@@ -1,0 +1,38 @@
+{
+  "name": "@pharma/shared",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@bull-board/api": "^5.7.5",
+    "@bull-board/ui": "^5.7.5",
+    "@prisma/client": "^5.15.0",
+    "@sindresorhus/is": "^6.1.1",
+    "@upstash/ratelimit": "^1.0.1",
+    "bullmq": "^4.12.2",
+    "cheerio": "^1.0.0-rc.12",
+    "node-fetch": "^3.3.2",
+    "openai": "^4.27.0",
+    "pino": "^8.17.0",
+    "pino-pretty": "^10.3.1",
+    "playwright": "^1.44.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/node-fetch": "^2.6.4",
+    "@types/pino-pretty": "^9.2.1",
+    "tsup": "^7.2.0",
+    "typescript": "^5.4.5",
+    "vitest": "^1.5.2"
+  }
+}

@@ -1,0 +1,2 @@
+-- Prisma migration placeholder (generate via `pnpm migrate`)
+-- The schema is defined in prisma/schema.prisma. Run Prisma migrate to create the DB structure.

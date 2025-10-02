@@ -1,0 +1,17 @@
+node_modules
+.pnp.cjs
+.pnp.loader.mjs
+.pnpm-store
+.next
+out
+.env
+.env.local
+.env.*.local
+.prisma
+coverage
+playwright-report
+artifacts
+.DS_Store
+*.log
+.idea
+.vscode
