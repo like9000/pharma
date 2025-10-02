@@ -1,0 +1,11 @@
+{
+  "root": true,
+  "extends": ["next/core-web-vitals", "turbo", "prettier"],
+  "parserOptions": {
+    "project": ["./apps/web/tsconfig.json", "./workers/tsconfig.json", "./packages/*/tsconfig.json"],
+    "tsconfigRootDir": __dirname
+  },
+  "rules": {
+    "@next/next/no-html-link-for-pages": "off"
+  }
+}

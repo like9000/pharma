@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String?  @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role     @default(VIEWER)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  auditLogs     AuditLog[]
+}
+
+enum Role {
+  ADMIN
+  OPS
+  VIEWER
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  oauth_token_secret String?
+  oauth_token        String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model GlobalSecret {
+  id             String   @id @default(cuid())
+  key            String   @unique
+  encryptedValue String   @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model ScrapeProfile {
+  id             String   @id @default(cuid())
+  name           String
+  isDefault      Boolean  @default(false)
+  selectorsJson  Json
+  cleanersJson   Json
+  imageRulesJson Json
+  priceRulesJson Json
+  testUrl        String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  overrides      SiteOverride[]
+}
+
+model PromptTemplate {
+  id        String     @id @default(cuid())
+  name      String
+  type      PromptType
+  content   String   @db.Text
+  version   Int      @default(1)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  overridesProduct SiteOverride[] @relation("PromptProduct")
+  overridesShort   SiteOverride[] @relation("PromptShort")
+}
+
+enum PromptType {
+  product
+  short_desc
+}
+
+model WooMapping {
+  id        String   @id @default(cuid())
+  name      String
+  fieldsJson Json
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  overrides SiteOverride[]
+}
+
+model Site {
+  id        String   @id @default(cuid())
+  domain    String   @unique
+  serverIp  String
+  wpAdminUrl String?
+  status    SiteStatus @default(idle)
+  createdAt DateTime @default(now())
+  overrides SiteOverride[]
+  jobs      Job[]
+}
+
+enum SiteStatus {
+  idle
+  ready
+  error
+}
+
+model SiteOverride {
+  id               String   @id @default(cuid())
+  siteId           String
+  scrapeProfileId  String?
+  promptProductId  String?
+  promptShortId    String?
+  wooMappingId     String?
+  r2ConfigJson     Json?
+  wooCredsSecretKey String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  site          Site           @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  scrapeProfile ScrapeProfile? @relation(fields: [scrapeProfileId], references: [id])
+  promptProduct PromptTemplate? @relation("PromptProduct", fields: [promptProductId], references: [id])
+  promptShort   PromptTemplate? @relation("PromptShort", fields: [promptShortId], references: [id])
+  wooMapping    WooMapping?    @relation(fields: [wooMappingId], references: [id])
+}
+
+model Job {
+  id         String   @id @default(cuid())
+  siteId     String
+  inputJson  Json
+  status     JobStatus @default(queued)
+  createdAt  DateTime @default(now())
+  finishedAt DateTime?
+
+  site           Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  steps          JobStep[]
+  productImports ProductImport[]
+}
+
+enum JobStatus {
+  queued
+  running
+  success
+  failed
+}
+
+model JobStep {
+  id         String   @id @default(cuid())
+  jobId      String
+  name       String
+  status     JobStepStatus @default(pending)
+  startedAt  DateTime?
+  finishedAt DateTime?
+  logsJson   Json?
+  createdAt  DateTime @default(now())
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+}
+
+enum JobStepStatus {
+  pending
+  running
+  success
+  failed
+}
+
+model ProductImport {
+  id        String   @id @default(cuid())
+  jobId     String
+  sku       String
+  status    ProductImportStatus
+  message   String?
+  createdAt DateTime @default(now())
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+}
+
+enum ProductImportStatus {
+  created
+  updated
+  skipped
+  failed
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  entity    String
+  entityId  String
+  diffJson  Json
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}

@@ -1,0 +1,19 @@
+{
+  "name": "pharma-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@8.15.4",
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r run build",
+    "lint": "pnpm -r run lint",
+    "test": "pnpm -r run test",
+    "migrate": "pnpm --filter @pharma/web prisma migrate deploy",
+    "generate": "pnpm --filter @pharma/web prisma generate",
+    "seed": "pnpm --filter @pharma/web prisma db seed"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "turbo": "^1.12.4"
+  }
+}
